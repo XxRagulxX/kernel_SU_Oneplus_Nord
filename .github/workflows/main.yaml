@@ -18,21 +18,23 @@ jobs:
       uses: actions/checkout@v3
       with:
         persist-credentials: false
-        submodules: recursive
+        submodules: false
         fetch-depth: 0
 
     - name: Prepare Kernel Source
       run: |
-        git checkout fourteen
+        cd $GITHUB_WORKSPACE
         git submodule update --init --recursive
+        git checkout fourteen
 
     - name: Clone KernelSU
       run: |
+        cd $GITHUB_WORKSPACE
         git clone https://github.com/tiann/KernelSU.git kernel/KernelSU
 
     - name: Configure Kernel
       run: |
-        cd kernel
+        cd $GITHUB_WORKSPACE/kernel
         export ARCH=arm64
         export CROSS_COMPILE=aarch64-linux-gnu-
         make <device_defconfig>
@@ -41,7 +43,7 @@ jobs:
 
     - name: Build Kernel
       run: |
-        cd kernel
+        cd $GITHUB_WORKSPACE/kernel
         make -j$(nproc) CC=clang
 
     - name: Upload Build Artifacts
