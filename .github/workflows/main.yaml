@@ -1,0 +1,43 @@
+name: Build Kernel with KernelSU
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * *"  # Adjust as needed
+
+jobs:
+  build-kernel:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y bc bison flex libssl-dev make gcc clang llvm
+
+    - name: Clone Kernel Source
+      run: |
+        git clone https://github.com/<username>/<kernel-repo>.git kernel
+        cd kernel
+        git checkout <branch>
+    
+    - name: Clone KernelSU
+      run: |
+        git clone https://github.com/tiann/KernelSU.git kernel/KernelSU
+
+    - name: Configure Kernel
+      run: |
+        cd kernel
+        make ARCH=arm64 <device_defconfig>
+        echo "CONFIG_KERNELSU=y" >> .config
+        make ARCH=arm64 olddefconfig
+
+    - name: Build Kernel
+      run: |
+        cd kernel
+        make ARCH=arm64 CC=clang CROSS_COMPILE=aarch64-linux-gnu- -j$(nproc)
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: kernel-build
+        path: kernel/out/arch/arm64/boot/Image.gz-dtb
