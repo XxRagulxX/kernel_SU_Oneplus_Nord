@@ -17,15 +17,14 @@ jobs:
     - name: Checkout Kernel Source
       uses: actions/checkout@v3
       with:
-        persist-credentials: false
-        submodules: false
-        fetch-depth: 0
+          persist-credentials: false
+          submodules: false
+          fetch-depth: 0
 
     - name: Prepare Kernel Source
       run: |
-        cd $GITHUB_WORKSPACE
-        git submodule update --init --recursive
-        git checkout fourteen
+          git -C $GITHUB_WORKSPACE submodule update --init --recursive
+          git -C $GITHUB_WORKSPACE checkout fourteen
 
     - name: Clone KernelSU
       run: |
